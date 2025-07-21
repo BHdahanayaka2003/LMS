@@ -1,203 +1,731 @@
-// src/components/LoginPage.jsx
+import React, { useState, useEffect, useRef } from 'react';
 
-import React, { useState, useEffect } from 'react';
-import eduIMG from './assets/eduIMG.jpg';
- // Adjust path as needed
-
-
-// --- Enhanced SVG Icons ---
-// Now accept props for dynamic styling based on input focus.
-const UserIcon = ({ isFocused }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{...styles.inputIcon, color: isFocused ? theme.colors.primary : theme.colors.icon}}>
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-        <circle cx="12" cy="7" r="4"></circle>
-    </svg>
+// Enhanced SVG Icons with better visual design
+const UserIcon = ({ isFocused, hasError }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke={hasError ? '#ef4444' : isFocused ? '#3b82f6' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="7" r="4" stroke={hasError ? '#ef4444' : isFocused ? '#3b82f6' : '#9ca3af'} strokeWidth="2"/>
+  </svg>
 );
 
-const LockIcon = ({ isFocused }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{...styles.inputIcon, color: isFocused ? theme.colors.primary : theme.colors.icon}}>
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-    </svg>
+const LockIcon = ({ isFocused, hasError }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke={hasError ? '#ef4444' : isFocused ? '#3b82f6' : '#9ca3af'} strokeWidth="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke={hasError ? '#ef4444' : isFocused ? '#3b82f6' : '#9ca3af'} strokeWidth="2"/>
+  </svg>
 );
 
 const EyeIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-    </svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2"/>
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+  </svg>
 );
 
 const EyeOffIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-        <line x1="1" y1="1" x2="23" y2="23"></line>
-    </svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2"/>
+    <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2"/>
+  </svg>
 );
 
-// --- Creative Sub-components ---
-const LoadingDots = () => (
-    <div style={styles.loadingDotsContainer}>
-        <div style={{...styles.loadingDot, animationDelay: '0s'}}></div>
-        <div style={{...styles.loadingDot, animationDelay: '0.2s'}}></div>
-        <div style={{...styles.loadingDot, animationDelay: '0.4s'}}></div>
-    </div>
+const ShieldIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#3b82f6" strokeWidth="2" fill="rgba(59, 130, 246, 0.1)"/>
+  </svg>
 );
 
+const BookIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#10b981" strokeWidth="2"/>
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#10b981" strokeWidth="2"/>
+  </svg>
+);
 
+const GraduationIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z" stroke="#8b5cf6" strokeWidth="2"/>
+    <path d="M6 12v5c3 3 9 3 12 0v-5" stroke="#8b5cf6" strokeWidth="2"/>
+  </svg>
+);
+
+// Loading Animation Component
+const LoadingSpinner = () => (
+  <div className="loading-spinner">
+    <div className="spinner"></div>
+  </div>
+);
+
+// Floating Particles Background
+const FloatingParticles = () => {
+  const particles = Array.from({ length: 20 }, (_, i) => (
+    <div
+      key={i}
+      className="particle"
+      style={{
+        left: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 5}s`,
+        animationDuration: `${8 + Math.random() * 4}s`
+      }}
+    />
+  ));
+  
+  return <div className="particles-container">{particles}</div>;
+};
+
+// Feature Card Component
+const FeatureCard = ({ icon, title, description, delay }) => (
+  <div className="feature-card" style={{ animationDelay: `${delay}s` }}>
+    <div className="feature-icon">{icon}</div>
+    <h3 className="feature-title">{title}</h3>
+    <p className="feature-description">{description}</p>
+  </div>
+);
+
+// Main Login Component
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    userType: 'student'
+  });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-
-  // --- State for advanced animations and interactions ---
   const [isMounted, setIsMounted] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [focusedField, setFocusedField] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+  const formRef = useRef(null);
 
-  // Trigger mount animation once the component is ready
   useEffect(() => {
     const timer = setTimeout(() => setIsMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    if (!email || !password) {
-      setTimeout(() => {
-        setError('Please provide both your email and password.');
-        setIsLoading(false);
-      }, 500);
-      return;
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'email':
+        if (!value) return 'Email is required';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email';
+        return '';
+      case 'password':
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        return '';
+      default:
+        return '';
     }
-    
-    // Simulate API call
-    setTimeout(() => {
-      if (email === "student@example.com" && password === "password123") {
-        alert('Login Successful! Welcome Student.');
-        // On success, you might redirect: history.push('/dashboard');
-      } else {
-        setError('Invalid credentials. Please check your email and password.');
-      }
-      setIsLoading(false);
-    }, 2000);
   };
 
-  // --- Dynamic Style Functions for interactivity ---
-  const getCardStyle = () => ({
-    ...styles.loginCard,
-    opacity: isMounted ? 1 : 0,
-    transform: isMounted ? 'translateY(0)' : 'translateY(30px)',
-  });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Real-time validation
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
 
-  const getLeftPanelStyle = () => ({
-    ...styles.leftPanel,
-    opacity: isMounted ? 1 : 0,
-    transform: isMounted ? 'translateX(0)' : 'translateX(-30px)',
-    transitionDelay: '0.2s',
-  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate all fields
+    const newErrors = {};
+    Object.keys(formData).forEach(key => {
+      if (key !== 'userType') {
+        const error = validateField(key, formData[key]);
+        if (error) newErrors[key] = error;
+      }
+    });
 
-  const getInputStyle = (isFocused) => ({
-    ...styles.input,
-    borderColor: isFocused ? theme.colors.primary : theme.colors.border,
-    boxShadow: isFocused ? `0 0 0 3px ${theme.colors.primary}40` : 'none',
-  });
-  
-  const getButtonStyle = () => ({
-      ...styles.loginButton,
-      ...(isLoading && styles.buttonLoading),
-      ...(isButtonHovered && !isLoading && styles.buttonHover),
-  });
-  
-  const getErrorStyle = () => ({
-      ...styles.errorText,
-      opacity: error ? 1 : 0,
-      transform: error ? 'translateY(0)' : 'translateY(-10px)',
-      maxHeight: error ? '100px' : '0',
-      padding: error ? '12px' : '0 12px',
-      marginBottom: error ? '20px' : '0',
-  });
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Demo credentials
+      const validCredentials = {
+        student: { email: 'student@university.edu', password: 'student123' },
+        lecturer: { email: 'lecturer@university.edu', password: 'lecturer123' }
+      };
+
+      const valid = validCredentials[formData.userType];
+      
+      if (formData.email === valid.email && formData.password === valid.password) {
+        setIsSuccess(true);
+        setTimeout(() => {
+          alert(`Welcome ${formData.userType}! Redirecting to dashboard...`);
+        }, 1000);
+      } else {
+        setErrors({ 
+          general: 'Invalid credentials. Please check your email and password.' 
+        });
+      }
+    } catch (error) {
+      setErrors({ 
+        general: 'Login failed. Please try again.' 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div style={styles.container}>
-      {/* This keyframe style needs to be injected globally, e.g., in your index.html or a <style> tag */}
-      <style>{`
-        @keyframes loading-dot-bounce {
-          0%, 80%, 100% { transform: scale(0); }
-          40% { transform: scale(1.0); }
+    <div className="login-container">
+      <style jsx>{`
+        .login-container {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .particles-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          overflow: hidden;
+        }
+
+        .particle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          animation: float linear infinite;
+        }
+
+        @keyframes float {
+          0% {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-20px) rotate(360deg);
+            opacity: 0;
+          }
+        }
+
+        .main-card {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(20px);
+          border-radius: 24px;
+          box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2);
+          display: flex;
+          max-width: 1200px;
+          width: 100%;
+          min-height: 700px;
+          overflow: hidden;
+          opacity: ${isMounted ? 1 : 0};
+          transform: ${isMounted ? 'translateY(0)' : 'translateY(30px)'};
+          transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .left-panel {
+          flex: 1;
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          padding: 60px 40px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          position: relative;
+          opacity: ${isMounted ? 1 : 0};
+          transform: ${isMounted ? 'translateX(0)' : 'translateX(-30px)'};
+          transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+        }
+
+        .brand-logo {
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 32px;
+          box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+          color: white;
+          font-size: 32px;
+          font-weight: bold;
+        }
+
+        .welcome-content h1 {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 16px;
+          line-height: 1.2;
+        }
+
+        .welcome-content p {
+          font-size: 1.1rem;
+          color: #64748b;
+          line-height: 1.6;
+          margin-bottom: 40px;
+          max-width: 400px;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 24px;
+          width: 100%;
+          max-width: 400px;
+        }
+
+        .feature-card {
+          background: white;
+          padding: 24px;
+          border-radius: 16px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          opacity: 0;
+          animation: slideInUp 0.8s ease-out forwards;
+        }
+
+        @keyframes slideInUp {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+        }
+
+        .feature-icon {
+          flex-shrink: 0;
+        }
+
+        .feature-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #1e293b;
+          margin: 0 0 4px 0;
+        }
+
+        .feature-description {
+          font-size: 0.8rem;
+          color: #64748b;
+          margin: 0;
+          line-height: 1.4;
+        }
+
+        .right-panel {
+          flex: 1;
+          padding: 60px 50px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          background: white;
+        }
+
+        .login-form {
+          width: 100%;
+          max-width: 400px;
+          margin: 0 auto;
+        }
+
+        .form-header {
+          text-align: center;
+          margin-bottom: 40px;
+        }
+
+        .form-title {
+          font-size: 2.25rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+          color: #64748b;
+          font-size: 1rem;
+        }
+
+        .user-type-selector {
+          display: flex;
+          background: #f8fafc;
+          border-radius: 12px;
+          padding: 6px;
+          margin-bottom: 32px;
+          position: relative;
+        }
+
+        .user-type-option {
+          flex: 1;
+          padding: 12px 20px;
+          border: none;
+          background: transparent;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          z-index: 2;
+        }
+
+        .user-type-option.active {
+          color: white;
+          background: #3b82f6;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .user-type-option:not(.active) {
+          color: #64748b;
+        }
+
+        .form-group {
+          margin-bottom: 24px;
+          position: relative;
+        }
+
+        .input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .input-icon {
+          position: absolute;
+          left: 16px;
+          z-index: 2;
+          transition: all 0.3s ease;
+        }
+
+        .form-input {
+          width: 100%;
+          padding: 16px 16px 16px 52px;
+          border: 2px solid #e2e8f0;
+          border-radius: 12px;
+          font-size: 1rem;
+          background: #fafafa;
+          transition: all 0.3s ease;
+          outline: none;
+        }
+
+        .form-input:focus {
+          border-color: #3b82f6;
+          background: white;
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input.error {
+          border-color: #ef4444;
+          background: #fef2f2;
+        }
+
+        .toggle-password {
+          position: absolute;
+          right: 16px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #64748b;
+          padding: 4px;
+          border-radius: 4px;
+          transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+          color: #3b82f6;
+        }
+
+        .error-message {
+          color: #ef4444;
+          font-size: 0.875rem;
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          opacity: 0;
+          transform: translateY(-4px);
+          animation: errorSlideIn 0.3s ease forwards;
+        }
+
+        @keyframes errorSlideIn {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .general-error {
+          background: #fef2f2;
+          color: #dc2626;
+          padding: 16px;
+          border-radius: 12px;
+          margin-bottom: 24px;
+          border-left: 4px solid #dc2626;
+          font-size: 0.9rem;
+        }
+
+        .form-options {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 32px;
+          font-size: 0.9rem;
+        }
+
+        .forgot-password {
+          color: #3b82f6;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+          color: #1d4ed8;
+          text-decoration: underline;
+        }
+
+        .submit-button {
+          width: 100%;
+          padding: 16px;
+          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          min-height: 56px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .submit-button:hover:not(:disabled) {
+          background: linear-gradient(135deg, #2563eb, #1e40af);
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(37, 99, 235, 0.4);
+        }
+
+        .submit-button:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .loading-spinner {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .spinner {
+          width: 24px;
+          height: 24px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-top: 2px solid white;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .success-state {
+          background: linear-gradient(135deg, #10b981, #059669) !important;
+        }
+
+        .form-footer {
+          text-align: center;
+          margin-top: 40px;
+          padding-top: 32px;
+          border-top: 1px solid #e2e8f0;
+          color: #64748b;
+          font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+          .main-card {
+            flex-direction: column;
+            max-width: 100%;
+            margin: 0 20px;
+          }
+
+          .left-panel, .right-panel {
+            padding: 40px 30px;
+          }
+
+          .welcome-content h1 {
+            font-size: 2rem;
+          }
+
+          .features-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
-      <div style={getCardStyle()}>
-        {/* Left Panel - Illustration and Welcome Message */}
-        <div style={getLeftPanelStyle()}>
-         <img 
-  src={eduIMG} 
-  alt="LMS Illustration"
-  style={styles.illustration}
-/>
 
-          <h1 style={styles.welcomeTitle}>Your Learning Journey Begins Here</h1>
-          <p style={styles.welcomeText}>Unlock a world of knowledge. Sign in to continue your adventure.</p>
+      <FloatingParticles />
+      
+      <div className="main-card">
+        <div className="left-panel">
+          <div className="brand-logo">
+            🎓
+          </div>
+          
+          <div className="welcome-content">
+            <h1>Welcome to EduHub</h1>
+            <p>Your comprehensive learning management system designed for modern education</p>
+          </div>
+
+          <div className="features-grid">
+            <FeatureCard
+              icon={<ShieldIcon />}
+              title="Secure Access"
+              description="Enterprise-grade security for your data"
+              delay={0.3}
+            />
+            <FeatureCard
+              icon={<BookIcon />}
+              title="Rich Learning"
+              description="Interactive courses and materials"
+              delay={0.4}
+            />
+            <FeatureCard
+              icon={<GraduationIcon />}
+              title="Track Progress"
+              description="Comprehensive analytics and insights"
+              delay={0.5}
+            />
+          </div>
         </div>
 
-        {/* Right Panel - Login Form */}
-        <div style={styles.rightPanel}>
-          <form onSubmit={handleSubmit} noValidate>
-            <h2 style={styles.formTitle}>Secure Login</h2>
-            
-            <div style={getErrorStyle()}>{error}</div>
-            
-            <div style={styles.inputGroup}>
-              <UserIcon isFocused={emailFocused} />
-              <input
-                type="email"
-                placeholder="student@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={getInputStyle(emailFocused)}
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-                disabled={isLoading}
-                autoComplete="email"
-              />
+        <div className="right-panel">
+          <form className="login-form" onSubmit={handleSubmit} ref={formRef}>
+            <div className="form-header">
+              <h2 className="form-title">Sign In</h2>
+              <p className="form-subtitle">Access your learning dashboard</p>
             </div>
 
-            <div style={styles.inputGroup}>
-              <LockIcon isFocused={passwordFocused} />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="password123"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={getInputStyle(passwordFocused)}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-                disabled={isLoading}
-                autoComplete="current-password"
-              />
+            <div className="user-type-selector">
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={styles.eyeButton}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                disabled={isLoading}
+                className={`user-type-option ${formData.userType === 'student' ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({ ...prev, userType: 'student' }))}
               >
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                Student
+              </button>
+              <button
+                type="button"
+                className={`user-type-option ${formData.userType === 'lecturer' ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({ ...prev, userType: 'lecturer' }))}
+              >
+                Lecturer
               </button>
             </div>
 
-            <div style={styles.options}>
+            {errors.general && (
+              <div className="general-error">
+                {errors.general}
+              </div>
+            )}
+
+            <div className="form-group">
+              <div className="input-wrapper">
+                <div className="input-icon">
+                  <UserIcon isFocused={focusedField === 'email'} hasError={!!errors.email} />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder={`${formData.userType}@university.edu`}
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField('')}
+                  className={`form-input ${errors.email ? 'error' : ''}`}
+                  disabled={isLoading}
+                  autoComplete="email"
+                />
+              </div>
+              {errors.email && (
+                <div className="error-message">
+                  ⚠️ {errors.email}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <div className="input-wrapper">
+                <div className="input-icon">
+                  <LockIcon isFocused={focusedField === 'password'} hasError={!!errors.password} />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  placeholder={`${formData.userType}123`}
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField('')}
+                  className={`form-input ${errors.password ? 'error' : ''}`}
+                  disabled={isLoading}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+              {errors.password && (
+                <div className="error-message">
+                  ⚠️ {errors.password}
+                </div>
+              )}
+            </div>
+
+            <div className="form-options">
+              <div></div>
               <a 
-                href="#!" 
-                onClick={(e) => { e.preventDefault(); alert('Forgot Password flow initiated!'); }} 
-                style={styles.forgotPassword}
+                href="#" 
+                className="forgot-password"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert('Password reset functionality would be implemented here');
+                }}
               >
                 Forgot Password?
               </a>
@@ -205,211 +733,30 @@ const LoginPage = () => {
 
             <button 
               type="submit" 
-              style={getButtonStyle()} 
+              className={`submit-button ${isSuccess ? 'success-state' : ''}`}
               disabled={isLoading}
-              onMouseEnter={() => setIsButtonHovered(true)}
-              onMouseLeave={() => setIsButtonHovered(false)}
             >
-              {isLoading ? <LoadingDots /> : 'Login'}
+              {isLoading ? (
+                <LoadingSpinner />
+              ) : isSuccess ? (
+                '✓ Success! Redirecting...'
+              ) : (
+                'Sign In'
+              )}
             </button>
+
+            <div className="form-footer">
+              <p>Demo Credentials:</p>
+              <p><strong>Student:</strong> student@university.edu / student123</p>
+              <p><strong>Lecturer:</strong> lecturer@university.edu / lecturer123</p>
+              <br />
+              <p>© 2024 EduHub LMS. All rights reserved.</p>
+            </div>
           </form>
-          <p style={styles.footerText}>
-            © 2024 Your LMS Name. All Rights Reserved.
-          </p>
         </div>
       </div>
     </div>
   );
-};
-
-// --- STYLES & THEME ---
-const theme = {
-    colors: {
-        primary: '#6a6ff2',
-        primaryDark: '#5a5fdd',
-        background: '#f0f4f8',
-        card: '#ffffff',
-        text: '#333',
-        textSecondary: '#555',
-        icon: '#888',
-        border: '#ddd',
-        error: '#d93025',
-        errorBg: '#f8d7da',
-    },
-    font: "'Poppins', sans-serif"
-};
-
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    background: `linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)`, // More elegant gradient
-    fontFamily: theme.font,
-    padding: '20px',
-  },
-  loginCard: {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '100%',
-    maxWidth: '950px',
-    minHeight: '600px',
-    background: theme.colors.card,
-    borderRadius: '20px',
-    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.15)',
-    overflow: 'hidden',
-    transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-  },
-  leftPanel: {
-    flex: 1,
-    padding: '40px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9ff',
-    textAlign: 'center',
-    transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-  },
-  illustration: {
-    width: '80%',
-    maxWidth: '350px',
-    marginBottom: '30px',
-  },
-  welcomeTitle: {
-    fontSize: '1.75rem',
-    fontWeight: 600,
-    color: theme.colors.text,
-    marginBottom: '15px',
-  },
-  welcomeText: {
-    fontSize: '1rem',
-    color: theme.colors.textSecondary,
-    lineHeight: '1.6',
-    maxWidth: '380px',
-  },
-  rightPanel: {
-    flex: 1,
-    padding: '40px 50px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    background: theme.colors.card,
-  },
-  formTitle: {
-    fontSize: '2rem',
-    fontWeight: 700,
-    color: theme.colors.text,
-    marginBottom: '10px',
-    textAlign: 'center',
-  },
-  inputGroup: {
-    position: 'relative',
-    marginBottom: '25px',
-  },
-  inputIcon: {
-    position: 'absolute',
-    left: '15px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    transition: 'color 0.3s ease',
-  },
-  input: {
-    width: '100%',
-    padding: '16px 16px 16px 50px',
-    fontSize: '1rem',
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: '10px',
-    outline: 'none',
-    transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-    color: theme.colors.text,
-    backgroundColor: '#fafafa',
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: '12px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    color: theme.colors.icon,
-    padding: '5px',
-    display: 'flex',
-    alignItems: 'center',
-    borderRadius: '50%',
-  },
-  options: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginBottom: '30px',
-    fontSize: '0.9rem',
-  },
-  forgotPassword: {
-    color: theme.colors.primary,
-    textDecoration: 'none',
-    fontWeight: 500,
-    transition: 'text-decoration 0.3s',
-  },
-  loginButton: {
-    width: '100%',
-    padding: '16px',
-    fontSize: '1.1rem',
-    fontWeight: 'bold',
-    color: '#fff',
-    background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primaryDark})`,
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    transition: 'opacity 0.3s, box-shadow 0.3s, transform 0.2s',
-    boxShadow: `0 4px 15px ${theme.colors.primary}50`,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '54px', // Fixed height to prevent layout shift during loading
-  },
-  buttonHover: {
-     boxShadow: `0 8px 25px ${theme.colors.primary}70`,
-     transform: 'translateY(-2px)',
-  },
-  buttonLoading: {
-    opacity: 0.8,
-    cursor: 'not-allowed',
-  },
-  errorText: {
-    color: theme.colors.error,
-    backgroundColor: theme.colors.errorBg,
-    padding: '12px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    fontSize: '0.9rem',
-    fontWeight: 500,
-    overflow: 'hidden',
-    transition: 'opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, padding 0.3s ease, margin-bottom 0.3s ease',
-  },
-  footerText: {
-    marginTop: 'auto',
-    paddingTop: '20px',
-    textAlign: 'center',
-    fontSize: '0.8rem',
-    color: '#aaa',
-  },
-  // Styles for the loading dots animation
-  loadingDotsContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingDot: {
-    width: '8px',
-    height: '8px',
-    backgroundColor: '#fff',
-    borderRadius: '50%',
-    display: 'inline-block',
-    animation: 'loading-dot-bounce 1.4s infinite ease-in-out both',
-    margin: '0 4px'
-  },
 };
 
 export default LoginPage;

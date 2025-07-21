@@ -17,3 +17,6 @@ body, html, #root {
 *, *::before, *::after {
   box-sizing: border-box;
 }
+
+/* In your src/index.css or src/App.css */
+
